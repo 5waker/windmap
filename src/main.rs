@@ -1,14 +1,20 @@
 use iced::{
-    font::{Family, Weight}, theme::Theme, widget::{button, column, container, text}, Element, Font, Length, Sandbox, Settings
+    font::{Family, Weight},
+    theme::Theme,
+    widget::{button, column, container, text},
+    Element, Font, Length, Sandbox, Settings,
 };
 
+mod config;
 mod model;
+
 fn main() -> iced::Result {
-    MainMenu::run(Settings {
+    Mind::run(Settings {
         // Not Support include_bytes!("../resource/SourceHanSerifSC-VF.ttf")
-        default_font: Font{
+        // TODO 当前是硬code,后面改
+        default_font: Font {
             #[cfg(target_os = "linux")]
-            family: Family::Name("文泉驿微米黑"),
+            family: Family::Name("霞鹜文楷"),
             #[cfg(target_os = "macos")]
             family: Family::Name("苹方-简"),
             #[cfg(target_os = "windows")]
@@ -21,7 +27,7 @@ fn main() -> iced::Result {
 }
 
 #[derive(Default)]
-struct MainMenu {
+struct Mind {
     theme: Theme,
     theme_name: String,
 }
@@ -31,11 +37,14 @@ enum Message {
     ChangeTheme,
 }
 
-impl Sandbox for MainMenu {
+impl Sandbox for Mind {
     type Message = Message;
 
     fn new() -> Self {
-        Self { theme: Theme::Dark, theme_name: "暗".to_owned() }
+        Self {
+            theme: Theme::Dark,
+            theme_name: "暗".to_owned(),
+        }
     }
 
     fn title(&self) -> String {
@@ -57,7 +66,7 @@ impl Sandbox for MainMenu {
     }
 
     fn view(&self) -> Element<Message> {
-        let text_a = text(String::from("你好世界 Hello World"));
+        let text_a = text(String::from("你好小橙子"));
         let theme_button = button(text(&self.theme_name).width(Length::Fill))
             .on_press(Message::ChangeTheme)
             .padding(10);
