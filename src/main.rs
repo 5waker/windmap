@@ -2,11 +2,7 @@ use iced::{
     font::{Family, Weight},
     mouse,
     theme::Theme,
-    widget::{
-        button,
-        canvas,
-        column, container, text, text_input,
-    },
+    widget::{button, canvas, column, container, text, text_input},
     Element, Font, Length, Rectangle, Renderer, Sandbox, Settings,
 };
 
