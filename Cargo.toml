@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 home = "0.5.9"
-iced = "0.10.0"
+iced = { version = "0.10.0", features = ["canvas"] }
 serde = { version = "1.0.196", features = ["derive"] }

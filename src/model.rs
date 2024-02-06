@@ -55,7 +55,7 @@ impl<'a> Tree<'a> {
         Self {
             node_map: node_map,
             root: root,
-            count: todo!(),
+            count: 1,
         }
     }
 }

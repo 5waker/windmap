@@ -1,8 +1,13 @@
 use iced::{
     font::{Family, Weight},
+    mouse,
     theme::Theme,
-    widget::{button, column, container, text},
-    Element, Font, Length, Sandbox, Settings,
+    widget::{
+        button,
+        canvas,
+        column, container, text, text_input,
+    },
+    Element, Font, Length, Rectangle, Renderer, Sandbox, Settings,
 };
 
 mod config;
@@ -30,11 +35,13 @@ fn main() -> iced::Result {
 struct Mind {
     theme: Theme,
     theme_name: String,
+    content: String,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum Message {
     ChangeTheme,
+    NodeInput(String),
 }
 
 impl Sandbox for Mind {
@@ -44,6 +51,7 @@ impl Sandbox for Mind {
         Self {
             theme: Theme::Dark,
             theme_name: "暗".to_owned(),
+            content: "".to_owned(),
         }
     }
 
@@ -62,29 +70,38 @@ impl Sandbox for Mind {
                     Theme::Dark
                 }
             }
+            Message::NodeInput(title) => self.content = title,
         }
     }
 
     fn view(&self) -> Element<Message> {
-        let text_a = text(String::from("你好小橙子"));
-        let theme_button = button(text(&self.theme_name).width(Length::Fill))
-            .on_press(Message::ChangeTheme)
-            .padding(10);
-        container(
-            column![
-                container(text_a).width(Length::Fill).center_x(),
-                container(theme_button).width(Length::Fill).center_x(),
-            ]
-            .spacing(25),
-        )
-        .height(Length::Fill)
-        .width(Length::Fill)
-        .center_x()
-        .center_y()
-        .into()
+        let t_canvas = canvas(self as &Self)
+            .width(Length::Fill)
+            .height(Length::Fill);
+
+        container(t_canvas)
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .padding(20)
+            .into()
     }
 
     fn theme(&self) -> Theme {
         self.theme.clone()
+    }
+}
+
+impl<Message> canvas::Program<Message> for Mind {
+    type State = ();
+
+    fn draw(
+        &self,
+        state: &Self::State,
+        renderer: &Renderer,
+        theme: &Theme,
+        bounds: Rectangle,
+        cursor: mouse::Cursor,
+    ) -> Vec<canvas::Geometry> {
+        todo!()
     }
 }
