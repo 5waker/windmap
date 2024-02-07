@@ -1,13 +1,10 @@
 use iced::{
-    font::{Family, Weight},
-    mouse,
-    theme::Theme,
-    widget::{button, canvas, column, container, text, text_input},
-    Element, Font, Length, Rectangle, Renderer, Sandbox, Settings,
+    alignment, font::{Family, Weight}, mouse, theme::Theme, widget::{button, canvas ,canvas::{fill::Rule, Fill, Style}, column, container, text, text_input}, Color, Element, Font, Length, Point, Rectangle, Renderer, Sandbox, Settings, Size, Vector
 };
 
 mod config;
 mod model;
+mod error;
 
 fn main() -> iced::Result {
     Mind::run(Settings {
@@ -32,6 +29,11 @@ struct Mind {
     theme: Theme,
     theme_name: String,
     content: String,
+
+    size: f32,
+    angle: f32,
+    scale: f32,
+    cache: canvas::Cache,
 }
 
 #[derive(Debug, Clone)]
@@ -48,6 +50,11 @@ impl Sandbox for Mind {
             theme: Theme::Dark,
             theme_name: "暗".to_owned(),
             content: "".to_owned(),
+
+            size: 40.0,
+            angle: 0.0,
+            scale: 1.0,
+            cache: canvas::Cache::new(),
         }
     }
 
@@ -98,6 +105,29 @@ impl<Message> canvas::Program<Message> for Mind {
         bounds: Rectangle,
         cursor: mouse::Cursor,
     ) -> Vec<canvas::Geometry> {
-        todo!()
+        let geometry = self.cache.draw(renderer, bounds.size(), |frame| {
+            // let palette = theme.palette();
+            let center = bounds.center();
+
+            frame.translate(Vector::new(center.x, center.y));
+            frame.scale(2.0);
+
+            // frame.fill_text(canvas::Text {
+            //     position: Point::new(0.0, 0.0),
+            //     color: palette.text,
+            //     size: self.size.into(),
+            //     content: String::from("Vectorial Text! 🎉"),
+            //     horizontal_alignment: alignment::Horizontal::Center,
+            //     vertical_alignment: alignment::Vertical::Center,
+            //     shaping: text::Shaping::Advanced,
+            //     ..canvas::Text::default()
+            // });
+            frame.fill_rectangle(Point::new(-50.0, -50.0), Size::new(100.0, 100.0), Fill{
+                style: Style::Solid(Color::WHITE),
+                rule: Rule::NonZero,
+            });
+        });
+
+        vec![geometry]
     }
 }

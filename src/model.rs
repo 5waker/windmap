@@ -1,4 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, default, ops::Add, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
+use crate::error;
 
 pub struct Tree {
     node_map: HashMap<u32, Rc<RefCell<Node>>>,
@@ -11,6 +13,7 @@ pub struct Node {
     pub title: String,
     pub is_root: bool,
     pub direction: Direction,
+    parent_id: u32,
     order: usize,
     path: String,
     level: u16,
@@ -43,6 +46,7 @@ impl Tree {
             title: title.clone(),
             is_root: true,
             direction: Direction::default(),
+            parent_id: 0,
             order: 0,
             path: String::from("."),
             level: 0,
@@ -59,35 +63,66 @@ impl Tree {
         }
     }
 
-    pub fn add_node(&mut self, parent_id: u32, title: String) {
-        self.count += 1;
+    pub fn add_node(&mut self, parent_id: u32, title: String) -> anyhow::Result<()> {
         // 先构造新节点的基础信息，不立即借用parent
-        let (n_path, parent_level, n_order) = {
-            let parent = self
-                .node_map
-                .get(&parent_id)
-                .expect("Parent not found")
-                .borrow();
+        let (n_path, n_level, n_order, p_id) = {
+            let parent = self.get_node(parent_id)?.borrow();
             let n_path = format!("{}{}.", parent.path, parent.id);
             let order = parent.children.len();
-            (n_path, parent.level + 1, order)
+            (n_path, parent.level + 1, order, parent.id)
         };
         let t_node = Rc::new(RefCell::new(Node {
-            id: self.count,
+            id: self.count + 1,
             title: title.clone(),
             is_root: false,
             direction: Direction::default(),
+            parent_id: p_id,
             order: n_order,
             path: n_path,
-            level: parent_level + 1,
+            level: n_level,
             tag: String::new(),
             color: NodeColor::default(),
             children: vec![],
         }));
+
+        self.get_node(parent_id)?
+            .borrow_mut()
+            .children
+            .push(t_node.clone());
         self.node_map.insert(t_node.borrow().id, t_node.clone());
+        self.count += 1;
+        Ok(())
     }
 
-    pub fn get_node(&self, node_id: u32) -> &Rc<RefCell<Node>> {
-        self.node_map.get(&node_id).unwrap()
+    pub  fn remove_node(&mut self, node_id: u32) -> anyhow::Result<()> {
+        let descendant_node_ids = self.get_descendant_ids(node_id)?;
+        for descendant_id in descendant_node_ids {
+            self.node_map.remove(&descendant_id);
+        }
+        self.node_map.remove(&node_id);
+        let node = self.get_node(node_id)?.borrow();
+        self.get_node(node.parent_id)?.borrow_mut().children.remove(node.order);
+        Ok(())
+    }
+
+    pub fn move_node(&self, node_id: u32) -> anyhow::Result<()>{
+
+        Ok(())
+    }
+
+    pub fn get_node(&self, node_id: u32) -> anyhow::Result<&Rc<RefCell<Node>>> {
+        Ok(self
+            .node_map
+            .get(&node_id)
+            .ok_or(error::NodeError::NotFound)?)
+    }
+
+    fn get_descendant_ids(&self, node_id: u32) -> anyhow::Result<Vec<u32>> {
+        let mut ids:Vec<u32> = Vec::new();
+        for child in &self.get_node(node_id)?.borrow().children {
+            ids.push(child.borrow().id);
+            ids.append(&mut self.get_descendant_ids(child.borrow().id)?);
+        }
+        Ok(ids)
     }
 }
